@@ -14,7 +14,7 @@ public class CreateDatabase {
             // Create connection statement
             Statement stmnt = conn.createStatement();
 
-            // Create video_game_encyclopedia database on local SQL server with script
+            // Create video_game_encyclopedia database on local SQL server using script
             File file = new File("src/main/resources/video_game_encyclopedia.sql");
             Scanner fileScanner = new Scanner(file);
             while (fileScanner.hasNextLine()) {
@@ -22,6 +22,8 @@ public class CreateDatabase {
                 update.executeUpdate();
             }
             fileScanner.close();
+
+            // Populate Tables
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
