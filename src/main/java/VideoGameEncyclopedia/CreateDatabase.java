@@ -1,8 +1,11 @@
 package VideoGameEncyclopedia;
 
+import com.google.gson.*;
+
 import java.sql.*;
 import java.io.*;
 import java.util.*;
+import java.net.*;
 
 public class CreateDatabase {
     public static void main(String[] args) {
@@ -23,7 +26,26 @@ public class CreateDatabase {
             }
             fileScanner.close();
 
-            // Populate Tables
+            // Retrieve Data
+            for (int i = 1; i <= 25; i++){
+                try {
+                    URL gameURL = new URL("https://api.rawg.io/api/games?page_size=40&page=" + i);
+                    InputStreamReader reader = new InputStreamReader(gameURL.openStream());
+                    JsonParser jp = new JsonParser();
+                    JsonElement je = jp.parse(reader);
+                    JsonObject root = je.getAsJsonObject();
+                    JsonArray results = root.getAsJsonArray("results");
+
+                    for (int j = 0; j < results.size(); j++){
+                        System.out.println(results.get(j));
+                    }
+                }
+                catch(Exception e){
+                    System.out.println(e.getMessage());
+                }
+            }
+
+            // Populate tables
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
