@@ -7,7 +7,7 @@ import java.net.*;
 import com.google.gson.*;
 
 public class CreateDatabase {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         try {
             // Prompt user for local SQL server password
             Scanner input = new Scanner(System.in);
@@ -56,6 +56,11 @@ public class CreateDatabase {
 
             // Populate tables
             populateTables(games, stmnt);
+
+            // Run server
+            System.out.println("Running server...");
+            WebServer server = new WebServer();
+            server.start(5000, password);
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
