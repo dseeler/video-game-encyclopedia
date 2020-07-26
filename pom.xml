@@ -36,6 +36,11 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.20</version>
         </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.9</version>
+        </dependency>
     </dependencies>
 
     <build>

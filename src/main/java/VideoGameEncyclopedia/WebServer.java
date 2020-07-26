@@ -64,7 +64,7 @@ final class HttpRequest implements Runnable{
         stmnt.executeUpdate("show databases;");
         stmnt.executeUpdate("use video_game_encyclopedia;");
         ResultSet result = stmnt.executeQuery("select title " +
-                "from Game where title = '" + query + "';");
+                "from Game where title like '%" + query + "%';");
         if (result.next()){
             gameExists = true;
         }
@@ -76,7 +76,8 @@ final class HttpRequest implements Runnable{
         if (gameExists) {
             statusLine = "HTTP/1.1 200 OK" + CRLF;
             contentTypeLine = "Content-type: application/json" + CRLF;
-            entityBody = makeJsonGame(query, stmnt);
+            Statement stmnt2 = conn.createStatement();
+            entityBody = makeJsonGame(query, stmnt, stmnt2);
         }
         else {
             statusLine = "HTTP/1.1 404 Not Found" + CRLF;
@@ -102,7 +103,12 @@ final class HttpRequest implements Runnable{
         return newString;
     }
 
-    private static String makeJsonGame(String query, Statement stmnt) throws Exception {
+    private static int countLines(String str){
+        String[] lines = str.split("\r\n|\r|\n");
+        return  lines.length;
+    }
+
+    private static String makeJsonGame(String query, Statement stmnt, Statement stmnt2) throws Exception {
         int id = 0;
         int metacriticScore = 0;
         String title = null;
@@ -111,50 +117,59 @@ final class HttpRequest implements Runnable{
         ArrayList<String> genresList = new ArrayList<>();
         ArrayList<String> platformsList = new ArrayList<>();
         ArrayList<String> storesList = new ArrayList<>();
+        ArrayList<Game> games = new ArrayList<>();
 
         ResultSet result = stmnt.executeQuery("select * " +
-                "from Game where title = '" + query + "';");
+                "from Game where title like '%" + query + "%';");
 
-        if (result.next()) {
+        while (result.next()) {
+            stmnt2.executeUpdate("show databases;");
+            stmnt2.executeUpdate("use video_game_encyclopedia;");
+
             id = Integer.parseInt(result.getString("id"));
             title = result.getString("title");
             releaseDate = result.getString("releaseDate");
             metacriticScore = Integer.parseInt(result.getString("metacriticScore"));
             imageLink = result.getString("imageLink");
-        }
 
-        result = stmnt.executeQuery("select genre from Genre where gameId = " + id);
-        while (result.next()){
-            genresList.add(result.getString("genre"));
-        }
 
-        result = stmnt.executeQuery("select platform from Platform where gameId = " + id);
-        while (result.next()){
-            platformsList.add(result.getString("platform"));
-        }
+            ResultSet result2 = stmnt2.executeQuery("select genre from Genre where gameId = " + id);
+            while (result2.next()) {
+                genresList.add(result2.getString("genre"));
+            }
 
-        result = stmnt.executeQuery("select store from Store where gameId = " + id);
-        while (result.next()){
-            storesList.add(result.getString("store"));
-        }
-        String[] genre = new String[genresList.size()];
-        for (int i = 0; i < genresList.size(); i++){
-            genre[i] = genresList.get(i);
-        }
+            result2 = stmnt2.executeQuery("select platform from Platform where gameId = " + id);
+            while (result2.next()) {
+                platformsList.add(result2.getString("platform"));
+            }
 
-        String[] platform = new String[platformsList.size()];
-        for (int i = 0; i < platformsList.size(); i++){
-            platform[i] = platformsList.get(i);
-        }
+            result2 = stmnt2.executeQuery("select store from Store where gameId = " + id);
+            while (result2.next()) {
+                storesList.add(result2.getString("store"));
+            }
+            String[] genre = new String[genresList.size()];
+            for (int i = 0; i < genresList.size(); i++) {
+                genre[i] = genresList.get(i);
+            }
 
-        String[] store = new String[storesList.size()];
-        for (int i = 0; i < storesList.size(); i++){
-            store[i] = storesList.get(i);
-        }
+            String[] platform = new String[platformsList.size()];
+            for (int i = 0; i < platformsList.size(); i++) {
+                platform[i] = platformsList.get(i);
+            }
 
-        Game game = new Game(id, title, releaseDate, metacriticScore, imageLink, genre, platform, store);
+            String[] store = new String[storesList.size()];
+            for (int i = 0; i < storesList.size(); i++) {
+                store[i] = storesList.get(i);
+            }
+
+            Game game = new Game(id, title, releaseDate, metacriticScore, imageLink, genre, platform, store);
+            games.add(game);
+        }
         Gson gson = new Gson();
-        String json = gson.toJson(game);
-        return json;
+        Game[] gamesArray = new Game[games.size()];
+        for (int i = 0; i < games.size(); i++){
+            gamesArray[i] = games.get(i);
+        }
+        return gson.toJson(gamesArray);
     }
 }

@@ -37,7 +37,7 @@ public class CreateDatabase {
             System.out.println("Retrieving games using RAWG.io API...");
             ArrayList<JsonObject> games = new ArrayList<>();
             int count = 100;
-            for (int i = 1; i <= 50; i++) {
+            for (int i = 1; i <= 5; i++) {
                 URL gameURL = new URL("https://api.rawg.io/api/games?page_size=40&page=" + i);
                 InputStreamReader reader = new InputStreamReader(gameURL.openStream());
                 JsonParser jp = new JsonParser();
