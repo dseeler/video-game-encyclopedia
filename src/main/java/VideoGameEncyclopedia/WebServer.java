@@ -54,51 +54,91 @@ final class HttpRequest implements Runnable{
         StringTokenizer tokens = new StringTokenizer(requestLine);
         tokens.nextToken(); // skip over the method, which should be "GET"
         String query = tokens.nextToken();
-        query = convertString(query);
+        if (!query.contains("favicon")) {
+            //query = convertString(query);
+            String category = getCategory(query);
+            String item = getItem(query);
 
-        // Query database
-        boolean gameExists = false;
-        String url = "jdbc:mysql://localhost:3306/?useTimezone=true&serverTimezone=UTC";
-        Connection conn = DriverManager.getConnection(url, "root", password);
-        Statement stmnt = conn.createStatement();
-        stmnt.executeUpdate("show databases;");
-        stmnt.executeUpdate("use video_game_encyclopedia;");
-        ResultSet result = stmnt.executeQuery("select title " +
-                "from Game where title like '%" + query + "%';");
-        if (result.next()){
-            gameExists = true;
-        }
-
-        // Construct the response message.
-        String statusLine = null;
-        String contentTypeLine = null;
-        String entityBody = null;
-        if (gameExists) {
-            statusLine = "HTTP/1.1 200 OK" + CRLF;
-            contentTypeLine = "Content-type: application/json" + CRLF;
+            // Query database
+            boolean gameExists = false;
+            String url = "jdbc:mysql://localhost:3306/?useTimezone=true&serverTimezone=UTC";
+            Connection conn = DriverManager.getConnection(url, "root", password);
+            Statement stmnt = conn.createStatement();
+            stmnt.executeUpdate("show databases;");
+            stmnt.executeUpdate("use video_game_encyclopedia;");
             Statement stmnt2 = conn.createStatement();
-            entityBody = makeJsonGame(query, stmnt, stmnt2);
-        }
-        else {
-            statusLine = "HTTP/1.1 404 Not Found" + CRLF;
-            contentTypeLine = "Content-type: " + "text/html" + CRLF;
-            entityBody = "<HTML>" +
-                    "<HEAD><TITLE>Not Found</TITLE></HEAD>" +
-                    "<BODY>Not Found</BODY></HTML>";
-        }
+            String entityBody = "";
+            switch (category) {
+                case "game":
+                ResultSet result = stmnt.executeQuery("select title " +
+                        "from Game where title like '%" + item + "%';");
+                if (result.next()) {
+                    gameExists = true;
+                    entityBody = makeJsonGame(item, stmnt, stmnt2, 1);
+                }
+                break;
+                case "genre":
+                    result = stmnt.executeQuery("select title from Game g1, Genre g2 " +
+                            "where g1.id = g2.gameId AND genre = '" + item + "';");
+                    if (result.next()) {
+                        gameExists = true;
+                        entityBody = makeJsonGame(item, stmnt, stmnt2, 2);
+                    }
+                    break;
+                case "year":
+                    result = stmnt.executeQuery("select title from Game where releaseDate" +
+                            " like '" + item + "%'");
+                    if (result.next()) {
+                        gameExists = true;
+                        entityBody = makeJsonGame(item, stmnt, stmnt2, 3);
+                    }
+                    break;
+            }
 
-        os.writeBytes(statusLine);
-        os.writeBytes(contentTypeLine);
-        os.writeBytes(CRLF);
-        os.writeBytes(entityBody);
+            // Construct the response message.
+            String statusLine = null;
+            String contentTypeLine = null;
+            if (gameExists) {
+                statusLine = "HTTP/1.1 200 OK" + CRLF;
+                contentTypeLine = "Content-type: application/json" + CRLF;
+                //Statement stmnt2 = conn.createStatement();
+                //entityBody = makeJsonGame(query, stmnt, stmnt2);
+            } else {
+                statusLine = "HTTP/1.1 404 Not Found" + CRLF;
+                contentTypeLine = "Content-type: " + "text/html" + CRLF;
+                entityBody = "<HTML>" +
+                        "<HEAD><TITLE>Not Found</TITLE></HEAD>" +
+                        "<BODY>Not Found</BODY></HTML>";
+            }
 
-        // Close the streams and socket.
-        os.close();
-        br.close();
-        socket.close();
+            os.writeBytes(statusLine);
+            os.writeBytes(contentTypeLine);
+            os.writeBytes(CRLF);
+            os.writeBytes(entityBody);
+
+            // Close the streams and socket.
+            os.close();
+            br.close();
+            socket.close();
+        }
     }
     private static String convertString(String str){
         String newString = str.substring(1, str.length());
+        newString = newString.replaceAll("_", " ");
+        return newString;
+    }
+
+    private static String getCategory(String str){
+        String newString = str.substring(1, str.length());
+        newString = newString.substring(0, newString.indexOf('/'));
+        newString = newString.replaceAll("_", " ");
+        return newString;
+    }
+
+    private static String getItem(String str){
+        String newString = str.substring(1, str.length());
+        int size = newString.length();
+        newString = newString.substring(newString.indexOf('/') + 1, size);
         newString = newString.replaceAll("_", " ");
         return newString;
     }
@@ -108,7 +148,8 @@ final class HttpRequest implements Runnable{
         return  lines.length;
     }
 
-    private static String makeJsonGame(String query, Statement stmnt, Statement stmnt2) throws Exception {
+    private static String makeJsonGame(String item, Statement stmnt, Statement stmnt2,
+                                       int searchType) throws Exception {
         int id = 0;
         int metacriticScore = 0;
         String title = null;
@@ -119,9 +160,20 @@ final class HttpRequest implements Runnable{
         ArrayList<String> storesList = new ArrayList<>();
         ArrayList<Game> games = new ArrayList<>();
 
-        ResultSet result = stmnt.executeQuery("select * " +
-                "from Game where title like '%" + query + "%';");
+        ResultSet result = null;
 
+        if (searchType == 1){
+            result = stmnt.executeQuery("select * " +
+                    "from Game where title like '%" + item + "%';");
+        }
+        else if (searchType == 2){
+            result = stmnt.executeQuery("select * from Game g1, Genre g2 " +
+                    "where g1.id = g2.gameId AND genre = '" + item + "';");
+        }
+        else if (searchType == 3){
+            result = stmnt.executeQuery("select * " +
+                    "from Game where releaseDate like '" + item + "%';");
+        }
         while (result.next()) {
             stmnt2.executeUpdate("show databases;");
             stmnt2.executeUpdate("use video_game_encyclopedia;");
