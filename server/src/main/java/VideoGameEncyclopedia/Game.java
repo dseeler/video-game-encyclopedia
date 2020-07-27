@@ -7,6 +7,7 @@ public class Game {
     private int id;
     private String title;
     private String releaseDate;
+    private String description;
     private int metacriticScore;
     private String imageLink;
     private String[] genre;
@@ -14,13 +15,14 @@ public class Game {
     private String[] store;
 
 
-    public Game(int id, String title, String releaseDate,
-                int metacriticScore, String imageLink,
-                String[] genre, String[] platform,
-                String[] store){
+    public Game(int id, String title, String description, 
+		String releaseDate, int metacriticScore,
+		String imageLink, String[] genre,
+		String[] platform, String[] store){
 
         this.id = id;
         this.title = title;
+	this.description = description;
         this.releaseDate = releaseDate;
         this.metacriticScore = metacriticScore;
         this.imageLink = imageLink;

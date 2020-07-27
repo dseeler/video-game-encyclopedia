@@ -69,6 +69,7 @@ public class CreateDatabase {
 
     public static void populateTables(ArrayList<JsonObject> list, Statement stmnt) {
         try {
+	    
             // Clear database
             stmnt.executeUpdate("SET SQL_SAFE_UPDATES = 0;");
             stmnt.executeUpdate("DELETE FROM Genre;");
@@ -83,10 +84,13 @@ public class CreateDatabase {
             // Iterate through every game retrieved
             for (int i = 0; i < list.size(); i++) {
                 try {
+		    		    
                     // Populate Game table
-                    stmnt.executeUpdate("INSERT INTO Game (id, title, releaseDate, metacriticScore, imageLink)" +
+		    Jwiki jwiki = new Jwiki(convertSpaces(trimStr(list.get(i).getAsJsonObject().get("name").toString())));
+                    stmnt.executeUpdate("INSERT INTO Game (id, title, description, releaseDate, metacriticScore, imageLink)" +
                             " VALUES (" + Integer.parseInt(list.get(i).getAsJsonObject().get("id").toString())
                             + ", '" + trimStr(list.get(i).getAsJsonObject().get("name").toString())
+					+ "', '" + jwiki.getExtractText()		
                             + "', '" + trimStr(list.get(i).getAsJsonObject().get("released").toString())
                             + "', " + Integer.parseInt(list.get(i).getAsJsonObject().get("metacritic").toString())
                             + ", '" + trimStr(list.get(i).getAsJsonObject().get("background_image").toString()) + "');");
@@ -114,6 +118,7 @@ public class CreateDatabase {
                                 ", '" + trimStr(list.get(i).getAsJsonArray("stores").get(j).getAsJsonObject()
                                 .get("store").getAsJsonObject().get("name").toString()) + "')");
                     }
+		    	        
                     inserted++;
                     if (inserted >= count){
                         System.out.println(inserted + " games inserted.");
@@ -138,6 +143,10 @@ public class CreateDatabase {
     // Used to trim quotation marks from Strings retrieved from data
     public static String trimStr(String str) {
         return str.substring(1, str.length() - 1);
+    }
+
+    public static String convertSpaces(String str){
+	return str.replaceAll(" ", "_");
     }
 }
 

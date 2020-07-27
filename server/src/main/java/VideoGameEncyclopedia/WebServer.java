@@ -153,6 +153,7 @@ final class HttpRequest implements Runnable{
         int id = 0;
         int metacriticScore = 0;
         String title = null;
+	String description = null;
         String releaseDate = null;
         String imageLink = null;
         ArrayList<String> genresList = new ArrayList<>();
@@ -180,6 +181,7 @@ final class HttpRequest implements Runnable{
 
             id = Integer.parseInt(result.getString("id"));
             title = result.getString("title");
+	    description = result.getString("description").replaceAll("[^\\x00-\\x7F]", " ");
             releaseDate = result.getString("releaseDate");
             metacriticScore = Integer.parseInt(result.getString("metacriticScore"));
             imageLink = result.getString("imageLink");
@@ -214,7 +216,8 @@ final class HttpRequest implements Runnable{
                 store[i] = storesList.get(i);
             }
 
-            Game game = new Game(id, title, releaseDate, metacriticScore, imageLink, genre, platform, store);
+            Game game = new Game(id, title, description, releaseDate, metacriticScore,
+				 imageLink, genre, platform, store);
             games.add(game);
         }
         Gson gson = new Gson();
