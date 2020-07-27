@@ -2,6 +2,7 @@
   Class written by "viralvaghela" on Github. Repository is free to the public.
   Link to Github repository: https://github.com/viralvaghela/Jwiki
   Link to viralvaghela's Github profile: https://github.com/viralvaghela
+  @author viralvaghela
  */
 
 package VideoGameEncyclopedia;
@@ -15,6 +16,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 
+// Used to retrieve data from wikipedia
 public class Jwiki {
     final String BASE_URL="https://en.wikipedia.org/api/rest_v1/page/summary/";
     String subject=null;

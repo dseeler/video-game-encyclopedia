@@ -2,6 +2,9 @@ package VideoGameEncyclopedia;
 
 import java.util.ArrayList;
 
+/**
+ * Represents a video game.
+ */
 public class Game {
 
     private int id;
@@ -14,7 +17,18 @@ public class Game {
     private String[] platform;
     private String[] store;
 
-
+    /**
+     * Constructor
+     * @param id id
+     * @param title title
+     * @param description description
+     * @param releaseDate release date
+     * @param metacriticScore metacritic score
+     * @param imageLink image link
+     * @param genre genres
+     * @param platform platforms
+     * @param store stores
+     */
     public Game(int id, String title, String description, 
 		String releaseDate, int metacriticScore,
 		String imageLink, String[] genre,
