@@ -1,29 +1,45 @@
 package VideoGameEncyclopedia;
 
-import java.util.ArrayList;
-
+/*
+ * Represents a video game.
+ */
 public class Game {
 
     private int id;
     private String title;
     private String releaseDate;
+    private String description;
     private int metacriticScore;
     private String imageLink;
+    private String clipLink;
     private String[] genre;
     private String[] platform;
     private String[] store;
 
-
-    public Game(int id, String title, String releaseDate,
-                int metacriticScore, String imageLink,
-                String[] genre, String[] platform,
-                String[] store){
+    /*
+     * Constructor
+     * @param id id
+     * @param title title
+     * @param description description
+     * @param releaseDate release date
+     * @param metacriticScore metacritic score
+     * @param imageLink image link
+     * @param genre genres
+     * @param platform platforms
+     * @param store stores
+     */
+    public Game(int id, String title, String description,
+        String releaseDate, int metacriticScore,
+        String imageLink, String clipLink, String[] genre,
+                String[] platform, String[] store){
 
         this.id = id;
         this.title = title;
+        this.description = description;
         this.releaseDate = releaseDate;
         this.metacriticScore = metacriticScore;
         this.imageLink = imageLink;
+        this.clipLink = clipLink;
 
         this.genre = new String[genre.length];
         for (int i = 0; i < genre.length; i++){

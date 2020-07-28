@@ -1,54 +1,174 @@
-import React, { useState } from 'react';
-import GameSearch from './game-search';
+import React, { useState, useEffect } from 'react';
+import Searchbar from './searchbar';
 import Nav from './nav';
 import Plots from './plots';
 import WishList from './wish-list';
+import GameDetail from './game-detail';
+import GamesList from './games-list';
+import { useQuery } from 'react-query';
+import { makeStyles } from '@material-ui/core/styles';
 import './../css/app.css';
+import {
+    Box,
+    CircularProgress,
+    Typography,
+} from '@material-ui/core';
 
-const fetchData = (dataExists) => {
-    return [ { name: 'game' } ];
-};
+const formatSearch = (search) => (
+    search.replace(/ /g, '_').toLowerCase()
+);
 
-const wishListClick = () => {
-    console.log('test');
-};
+const useStyles = makeStyles({
+    fetchingCircle: {
+        margin: '10% 0% 0% 0%'
+    },
+    center: {
+        width: '14%',
+        margin: '0 auto',
+        marginTop: '5%',
+    },
+});
 
 const App = () => {
     const [activeComponent, setActiveComponent] = useState('games-search');
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchType, setSearchType] = useState('game');
     const [data, setData] = useState([]);
     const [wishList, setWishList] = useState([]);
-    const [dataFetched, setDataFetched] = useState(false);
+    const [fetching, setFetching] = useState(false);
+    const [hasError, setHasError] = useState(false);
+    const [newSearch, setNewSearch] = useState(false);
+    const [newWishListItem, setNewWishListItem] = useState(0);
+    const [activeGame, setActiveGame] = useState();
 
-    if (!dataFetched) {
-        setData(fetchData);
-        setDataFetched(true);
+    const handleTextFieldChange = event => setSearchTerm(event.target.value);
+    const handleSelectInputChange = event => setSearchType(event.target.value);
+    const handleWishListClick = event => setActiveComponent('wish-list');
+    const handleTitleClick = event => setActiveComponent('games-list');
+    const handleGameClick = game => {
+        setActiveGame(game);
+        setActiveComponent('game-detail');
     }
+    const handleAddToWishList = game => {
+        // setNewWishListItem(game.id);
+        setWishList(wishList.concat(game));
+    };
+    const handleSearchSubmit = event => {
+        event.preventDefault();
+        setActiveComponent('games-list');
+        setNewSearch(true);
+    };
+    const handleBackClick = () => setActiveComponent('games-list');
 
-    const handleWishListClick = event => {
-        setActiveComponent('wish-list');
-    }
+    useEffect(() => {
+        setHasError(false);
+        setNewSearch(false);
+        if (searchTerm != '') {
+            setFetching(true);
+            fetch(`http://localhost:5000/${searchType}/${formatSearch(searchTerm)}`)
+                .then(res => res.json())
+                .then(json => {
+                    setData(json);
+                    setFetching(false);
+                })
+                .catch(error => {
+                    setFetching(false);
+                    setHasError(true);
+                });
+        }
+        setSearchTerm('');
+    }, [newSearch]);
 
-    const handleTitleClick = event => {
-        setActiveComponent('games-search');
-    }
+    // useEffect(() => {
+    //     if (newWishListItem != 0) {
+    //         setFetching(true);
+    //         fetch(`http://localhost:5000/bucket/${newWishListItem}`)
+    //             .catch(error => {
+    //                 setFetching(false);
+    //                 console.log(error);
+    //             });
+    //     }
+    //     setNewWishListItem(0);
+    // }, [newWishListItem]);
+
+    // useEffect(() => {
+    //     setFetching(true);
+    //     fetch(`http://localhost:5000/bucket/getgames`)
+    //         .then(res => res.json())
+    //         .then(json => {
+    //             setWishList(json);
+    //             setFetching(false);
+    //         })
+    //         .catch(error => {
+    //             setFetching(false);
+    //             console.log(error);
+    //         });
+    //     setWishListFetch(false);
+    // }, [wishListFetch])
+
+
+
+    const classes = useStyles();
 
     return (
         <>
             <Nav
-                onWishListClick={handleWishListClick}
-                onTitleClick={handleTitleClick}
+                handleWishListClick={handleWishListClick}
+                handleTitleClick={handleTitleClick}
+            />
+            <Searchbar
+                searchTerm={searchTerm}
+                searchType={searchType}
+                fetching={fetching}
+                handleTextFieldChange={handleTextFieldChange}
+                handleSelectInputChange={handleSelectInputChange}
+                handleSearchSubmit={handleSearchSubmit}
             />
             {
-                (activeComponent === 'games-search') ?
+                (activeComponent === 'games-list') ?
                     (
-                        <GameSearch />
+                        fetching ?
+                            (
+                                <Box
+                                    className={classes.fetchingCircle}
+                                    height="100%"
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                >
+                                    <CircularProgress />
+                                </Box>
+                            ) : hasError ? (
+                                <Typography
+                                    className={classes.center}
+                                    variant="h6"
+                                >
+                                    No results found
+                                </Typography>
+                            ) : (
+                                <GamesList
+                                    data={data}
+                                    handleGameClick={handleGameClick}
+                                />
+                            )
                     ) : (activeComponent === 'plots') ?
                     (
                         <Plots />
                     ) : (activeComponent === 'wish-list') ?
                     (
-                        <WishList />
+                        <WishList
+                            wishList={wishList}
+                            handleGameClick={handleGameClick}
+                        />
+                    ) : (activeComponent === 'game-detail') ?
+                    (
+                        <GameDetail
+                            data={data}
+                            wishList={wishList}
+                            activeGame={activeGame}
+                            handleAddToWishList={handleAddToWishList}
+                            handleBackClick={handleBackClick}
+                        />
                     ) : (
                         <>
                         </>

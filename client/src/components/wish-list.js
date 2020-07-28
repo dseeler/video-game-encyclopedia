@@ -1,9 +1,43 @@
 import React from 'react';
+import GamesList from './games-list';
+import { makeStyles } from '@material-ui/core/styles';
+import {
+    Typography,
+    Paper,
+    List,
+    ListItem,
+    ListItemText,
+    Box,
+    CircularProgress,
+} from '@material-ui/core';
 
-const WishList = (list) => (
-    <>
-        wish-list
-    </>
-);
+const useStyles = makeStyles({
+    root: {
+        width: '33%',
+        margin: '0 auto',
+        marginTop: '5%'
+    },
+});
+
+const WishList = ({
+    wishList,
+    handleGameClick,
+}) => {
+    const classes = useStyles();
+
+    return (
+        wishList.length === 0 ?
+            (
+                <Typography className={classes.root} variant="h6">
+                    You do not have any items in the wishlist
+                </Typography>
+            ) : (
+                <GamesList
+                    data={wishList}
+                    handleGameClick={handleGameClick}
+                />
+            )
+    )
+}
 
 export default WishList;

@@ -4,10 +4,14 @@ import java.sql.*;
 import java.io.*;
 import java.util.*;
 import java.net.*;
+
 import com.google.gson.*;
 
+/**
+ * Create video_game_encyclopedia database and populates it on local MySQL server
+ */
 public class CreateDatabase {
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         try {
             // Prompt user for local SQL server password
             Scanner input = new Scanner(System.in);
@@ -37,7 +41,7 @@ public class CreateDatabase {
             System.out.println("Retrieving games using RAWG.io API...");
             ArrayList<JsonObject> games = new ArrayList<>();
             int count = 100;
-            for (int i = 1; i <= 5; i++) {
+            for (int i = 1; i <= 50; i++) {
                 URL gameURL = new URL("https://api.rawg.io/api/games?page_size=40&page=" + i);
                 InputStreamReader reader = new InputStreamReader(gameURL.openStream());
                 JsonParser jp = new JsonParser();
@@ -67,8 +71,15 @@ public class CreateDatabase {
         }
     }
 
+    /**
+     * Populates video_game_encyclopedia database tables
+     *
+     * @param list  retrieved games
+     * @param stmnt connection statement
+     */
     public static void populateTables(ArrayList<JsonObject> list, Statement stmnt) {
         try {
+
             // Clear database
             stmnt.executeUpdate("SET SQL_SAFE_UPDATES = 0;");
             stmnt.executeUpdate("DELETE FROM Genre;");
@@ -83,20 +94,25 @@ public class CreateDatabase {
             // Iterate through every game retrieved
             for (int i = 0; i < list.size(); i++) {
                 try {
+
                     // Populate Game table
-                    stmnt.executeUpdate("INSERT INTO Game (id, title, releaseDate, metacriticScore, imageLink)" +
+                    Jwiki jwiki = new Jwiki(convertSpaces(trimStr(list.get(i).getAsJsonObject().get("name").toString())));
+
+                    stmnt.executeUpdate("INSERT INTO Game (id, title, description, releaseDate, metacriticScore, imageLink, clipLink)" +
                             " VALUES (" + Integer.parseInt(list.get(i).getAsJsonObject().get("id").toString())
                             + ", '" + trimStr(list.get(i).getAsJsonObject().get("name").toString())
+                            + "', '" + jwiki.getExtractText()
                             + "', '" + trimStr(list.get(i).getAsJsonObject().get("released").toString())
                             + "', " + Integer.parseInt(list.get(i).getAsJsonObject().get("metacritic").toString())
-                            + ", '" + trimStr(list.get(i).getAsJsonObject().get("background_image").toString()) + "');");
+                            + ", '" + trimStr(list.get(i).getAsJsonObject().get("background_image").toString())
+                            + "', '" + trimStr(list.get(i).getAsJsonObject().get("clip").getAsJsonObject().get("clip").toString()) + "');");
 
                     // Populate Genre Table
                     for (int j = 0; j < list.get(i).getAsJsonArray("genres").size(); j++) {
                         stmnt.executeUpdate("INSERT INTO Genre (gameId, genre) VALUES (" +
-                                        Integer.parseInt(list.get(i).getAsJsonObject().get("id").toString()) +
+                                Integer.parseInt(list.get(i).getAsJsonObject().get("id").toString()) +
                                 ", '" + trimStr(list.get(i).getAsJsonArray("genres").get(j).getAsJsonObject()
-                                        .get("name").toString()) + "')");
+                                .get("name").toString()) + "')");
                     }
 
                     // Populate Platform Table
@@ -114,18 +130,19 @@ public class CreateDatabase {
                                 ", '" + trimStr(list.get(i).getAsJsonArray("stores").get(j).getAsJsonObject()
                                 .get("store").getAsJsonObject().get("name").toString()) + "')");
                     }
+
+                    // Print progress
                     inserted++;
-                    if (inserted >= count){
+                    if (inserted >= count) {
                         System.out.println(inserted + " games inserted.");
                         count += 100;
                     }
 
                     // Skip to next game if a null value is present
-                } catch (Exception e){
+                } catch (Exception e) {
                     if (i < list.size()) {
                         i++;
-                    }
-                    else {
+                    } else {
                         break;
                     }
                 }
@@ -135,9 +152,21 @@ public class CreateDatabase {
         }
     }
 
-    // Used to trim quotation marks from Strings retrieved from data
+    /**
+     * Used to trim quotations mark from retrieved strings
+     * @param str retrieved string
+     * @return a string without quotation marks
+     */
     public static String trimStr(String str) {
         return str.substring(1, str.length() - 1);
     }
-}
 
+    /**
+     * Used to convert spaces to underscores for querying purposes
+     * @param str retrieved string
+     * @return a string with replaced spaces
+     */
+    public static String convertSpaces(String str) {
+        return str.replaceAll(" ", "_");
+    }
+}

@@ -11,14 +11,18 @@ const useStyles = makeStyles({
         color: 'inherit',
     },
     root: {
-        backgroundColor: '#039BE5'
+        // backgroundColor: '#039BE5',
+        background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
     },
     title: {
         cursor: 'pointer',
     },
 });
 
-const Nav = ({ onWishListClick, onTitleClick }) => {
+const Nav = ({
+    handleWishListClick,
+    handleTitleClick,
+}) => {
     const classes = useStyles();
 
     return (
@@ -28,13 +32,13 @@ const Nav = ({ onWishListClick, onTitleClick }) => {
                     <Typography
                         className={classes.title}
                         variant="h2"
-                        onClick={onTitleClick}
+                        onClick={handleTitleClick}
                     >
                         Video Game Encyclopedia
                     </Typography>
                     <Button
                         className={classes.toolbarButtons}
-                        onClick={onWishListClick}
+                        onClick={handleWishListClick}
                     >
                         Wish List
                     </Button>
