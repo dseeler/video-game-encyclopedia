@@ -262,8 +262,8 @@ final class HttpRequest implements Runnable {
             stmnt2.executeUpdate("use video_game_encyclopedia;");
 
             id = Integer.parseInt(result.getString("id"));
-            title = result.getString("title").replaceAll("[^\\x00-\\x7F]", " ");
-            description = result.getString("description").replaceAll("[^\\x00-\\x7F]", " ");
+            title = removeBadCharacters(result.getString("title"));
+            description = removeBadCharacters(result.getString("description"));
             releaseDate = result.getString("releaseDate");
             metacriticScore = Integer.parseInt(result.getString("metacriticScore"));
             imageLink = result.getString("imageLink");
@@ -312,5 +312,9 @@ final class HttpRequest implements Runnable {
         }
         // Return json string
         return gson.toJson(gamesArray);
+    }
+
+    private static String removeBadCharacters(String str) {
+        return str.replaceAll("[^\\x00-\\x7F]", " ");
     }
 }

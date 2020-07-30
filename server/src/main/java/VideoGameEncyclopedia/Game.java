@@ -1,6 +1,8 @@
 package VideoGameEncyclopedia;
 
-/*
+import java.util.ArrayList;
+
+/**
  * Represents a video game.
  */
 public class Game {
@@ -16,7 +18,7 @@ public class Game {
     private String[] platform;
     private String[] store;
 
-    /*
+    /**
      * Constructor
      * @param id id
      * @param title title
