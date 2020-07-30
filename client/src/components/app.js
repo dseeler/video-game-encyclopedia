@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Searchbar from './searchbar';
 import Nav from './nav';
-import Plots from './plots';
 import WishList from './wish-list';
 import GameDetail from './game-detail';
 import GamesList from './games-list';
@@ -19,7 +18,11 @@ const formatSearch = (search) => (
 
 const useStyles = makeStyles({
     fetchingCircle: {
-        margin: '10% 0% 0% 0%'
+        margin: '10% 0% 0% 0%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     center: {
         width: '14%',
@@ -78,31 +81,45 @@ const App = () => {
 
     const classes = useStyles();
 
+    const props = {
+        nav: {
+            handleWishListClick,
+            handleTitleClick,
+        },
+        searchbar: {
+            searchTerm,
+            searchType,
+            handleTextFieldChange,
+            handleSelectInputChange,
+            handleSearchSubmit,
+        },
+        gamesList: {
+            data,
+            handleGameClick,
+        },
+        wishlist: {
+            wishList,
+            handleGameClick,
+        },
+        gameDetail: {
+            data,
+            wishList,
+            activeGame,
+            handleAddToWishList,
+            handleBackClick,
+        },
+    };
+
     return (
         <>
-            <Nav
-                handleWishListClick={handleWishListClick}
-                handleTitleClick={handleTitleClick}
-            />
-            <Searchbar
-                searchTerm={searchTerm}
-                searchType={searchType}
-                handleTextFieldChange={handleTextFieldChange}
-                handleSelectInputChange={handleSelectInputChange}
-                handleSearchSubmit={handleSearchSubmit}
-            />
+            <Nav { ...props.nav } />
+            <Searchbar { ...props.searchbar } />
             {
                 (activeComponent === 'games-list') ?
                     (
                         fetching ?
                             (
-                                <Box
-                                    className={classes.fetchingCircle}
-                                    height="100%"
-                                    display="flex"
-                                    alignItems="center"
-                                    justifyContent="center"
-                                >
+                                <Box className={classes.fetchingCircle}>
                                     <CircularProgress />
                                 </Box>
                             ) : hasError ? (
@@ -118,27 +135,14 @@ const App = () => {
                                     handleGameClick={handleGameClick}
                                 />
                             )
-                    ) : (activeComponent === 'plots') ?
-                    (
-                        <Plots />
                     ) : (activeComponent === 'wish-list') ?
                     (
-                        <WishList
-                            wishList={wishList}
-                            handleGameClick={handleGameClick}
-                        />
+                        <WishList { ...props.wishlist } />
                     ) : (activeComponent === 'game-detail') ?
                     (
-                        <GameDetail
-                            data={data}
-                            wishList={wishList}
-                            activeGame={activeGame}
-                            handleAddToWishList={handleAddToWishList}
-                            handleBackClick={handleBackClick}
-                        />
+                        <GameDetail { ...props.gameDetail } />
                     ) : (
-                        <>
-                        </>
+                        null
                     )
             }
         </>
