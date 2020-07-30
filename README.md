@@ -6,12 +6,12 @@ Requirements before running project:
   - Python 3.5+
 
 
-To start the backend server, running at localhost:5000:
+To start the backend server, running at localhost:5000 :
 ```
 $ python3 start_server.py
 ```
 
-To start the frontend client, running at localhost:3000:
+To start the frontend client, running at localhost:3000 :
 ```
 $ python3 start_client.py
 ```
