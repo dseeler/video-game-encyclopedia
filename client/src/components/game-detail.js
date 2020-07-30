@@ -3,11 +3,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import _ from 'underscore';
 import {
     Typography,
-    Box,
     Paper,
     List,
     ListItem,
-    ListItemText,
     Button,
 } from '@material-ui/core';
 

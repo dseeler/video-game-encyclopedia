@@ -3,12 +3,6 @@ import GamesList from './games-list';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     Typography,
-    Paper,
-    List,
-    ListItem,
-    ListItemText,
-    Box,
-    CircularProgress,
 } from '@material-ui/core';
 
 const useStyles = makeStyles({

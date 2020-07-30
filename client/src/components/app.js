@@ -5,7 +5,6 @@ import Plots from './plots';
 import WishList from './wish-list';
 import GameDetail from './game-detail';
 import GamesList from './games-list';
-import { useQuery } from 'react-query';
 import { makeStyles } from '@material-ui/core/styles';
 import './../css/app.css';
 import {
@@ -38,7 +37,6 @@ const App = () => {
     const [fetching, setFetching] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [newSearch, setNewSearch] = useState(false);
-    const [newWishListItem, setNewWishListItem] = useState(0);
     const [activeGame, setActiveGame] = useState();
 
     const handleTextFieldChange = event => setSearchTerm(event.target.value);
@@ -50,7 +48,6 @@ const App = () => {
         setActiveComponent('game-detail');
     }
     const handleAddToWishList = game => {
-        // setNewWishListItem(game.id);
         setWishList(wishList.concat(game));
     };
     const handleSearchSubmit = event => {
@@ -63,7 +60,7 @@ const App = () => {
     useEffect(() => {
         setHasError(false);
         setNewSearch(false);
-        if (searchTerm != '') {
+        if (searchTerm !== '') {
             setFetching(true);
             fetch(`http://localhost:5000/${searchType}/${formatSearch(searchTerm)}`)
                 .then(res => res.json())
@@ -79,35 +76,6 @@ const App = () => {
         setSearchTerm('');
     }, [newSearch]);
 
-    // useEffect(() => {
-    //     if (newWishListItem != 0) {
-    //         setFetching(true);
-    //         fetch(`http://localhost:5000/bucket/${newWishListItem}`)
-    //             .catch(error => {
-    //                 setFetching(false);
-    //                 console.log(error);
-    //             });
-    //     }
-    //     setNewWishListItem(0);
-    // }, [newWishListItem]);
-
-    // useEffect(() => {
-    //     setFetching(true);
-    //     fetch(`http://localhost:5000/bucket/getgames`)
-    //         .then(res => res.json())
-    //         .then(json => {
-    //             setWishList(json);
-    //             setFetching(false);
-    //         })
-    //         .catch(error => {
-    //             setFetching(false);
-    //             console.log(error);
-    //         });
-    //     setWishListFetch(false);
-    // }, [wishListFetch])
-
-
-
     const classes = useStyles();
 
     return (
@@ -119,7 +87,6 @@ const App = () => {
             <Searchbar
                 searchTerm={searchTerm}
                 searchType={searchType}
-                fetching={fetching}
                 handleTextFieldChange={handleTextFieldChange}
                 handleSelectInputChange={handleSelectInputChange}
                 handleSearchSubmit={handleSearchSubmit}

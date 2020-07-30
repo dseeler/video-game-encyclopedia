@@ -2,16 +2,11 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import {
-    Box,
-    CircularProgress,
     TextField,
     Grid,
     Select,
     MenuItem,
     Button,
-    List,
-    ListItem,
-    ListItemText,
 } from '@material-ui/core';
 
 const useStyles = makeStyles({
@@ -45,7 +40,6 @@ const useStyles = makeStyles({
 const Searchbar = ({
     searchTerm,
     searchType,
-    fetching,
     handleTextFieldChange,
     handleSelectInputChange,
     handleSearchSubmit,

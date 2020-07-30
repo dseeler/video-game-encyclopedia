@@ -34,7 +34,7 @@ const GamesList = ({
             {
                 data.map(game => (
                     <ListItem className={classes.listItem} onClick={() => handleGameClick(game)}>
-                        <img src={game.imageLink} width="160" height="90" />
+                        <img alt={game.title} src={game.imageLink} width="160" height="90" />
                         <ListItemText
                             className={classes.listItemText}
                             primary={game.title}
