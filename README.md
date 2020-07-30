@@ -4,9 +4,11 @@ Requirements before running project:
   - Node.js 10+
   - Maven (latest)
   - Python 3.5+
+  - Yarn (latest)
 
 
-To start the backend server, running at localhost:5000:
+To start the backend server, running at localhost:5000 (note: it may take a while
+    to populate the database tables, we limited it to 2,000 games to save on time)
 ```
 $ python3 start_server.py
 ```
